@@ -28,7 +28,7 @@ Ganancia cobrada: intereses + mora + comisiones efectivamente cobrados.
 3. Stack definitivo (no agregar ni cambiar sin autorización explícita)
 Framework: Next.js 16 (App Router), React 19, TypeScript en modo estricto.
 Estilos y UI: Tailwind CSS 4, shadcn/ui (estilo base-vega, color base neutral), iconos lucide-react, notificaciones con sonner.
-Backend: Server Components para lectura, Server Actions para escritura. Route Handlers solo para webhooks y tareas programadas.
+Backend: Server Components para lectura, Server Actions para escritura. Route Handlers solo para webhooks, tareas programadas y una única excepción de autenticación: src/app/auth/confirm/route.ts, que verifica el token de los enlaces de correo de Supabase (confirmación de registro y recuperación de contraseña), establece la cookie de sesión y redirige solo a rutas internas de una lista permitida. No contiene lógica de negocio ni escribe en la base de datos.
 Base de datos: PostgreSQL en Supabase.
 ORM y migraciones: Drizzle ORM + drizzle-kit, driver postgres (con prepared statements desactivados por el pooler de Supabase).
 Autenticación: Supabase Auth (paquete ssr), sesión gestionada desde el proxy de Next.js.
