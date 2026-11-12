@@ -71,14 +71,20 @@ const leerMembresiaActiva = cache(async (usuarioId: string) => {
   return fila ?? null
 })
 
-/** Indica si el usuario tiene alguna membresía, activa o inactiva. */
-export async function tieneAlgunaMembresia(usuarioId: string): Promise<boolean> {
+export type EstadoMembresia = "activa" | "inactiva" | "ninguna"
+
+/**
+ * Solo un usuario sin ninguna membresía puede crear un negocio. Con una
+ * membresía inactiva, su acceso fue desactivado por el dueño.
+ */
+export async function estadoMembresia(usuarioId: string): Promise<EstadoMembresia> {
+  if (await leerMembresiaActiva(usuarioId)) return "activa"
   const [fila] = await db()
     .select({ id: membresias.id })
     .from(membresias)
     .where(eq(membresias.usuarioId, usuarioId))
     .limit(1)
-  return Boolean(fila)
+  return fila ? "inactiva" : "ninguna"
 }
 
 /**
