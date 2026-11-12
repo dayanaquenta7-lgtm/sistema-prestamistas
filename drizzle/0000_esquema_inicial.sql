@@ -54,4 +54,4 @@ ALTER TABLE "auditoria" ADD CONSTRAINT "auditoria_negocio_id_negocios_id_fk" FOR
 ALTER TABLE "auditoria" ADD CONSTRAINT "auditoria_usuario_id_perfiles_id_fk" FOREIGN KEY ("usuario_id") REFERENCES "public"."perfiles"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "membresias_usuario_idx" ON "membresias" USING btree ("usuario_id","creado_en");--> statement-breakpoint
 CREATE INDEX "auditoria_negocio_fecha_idx" ON "auditoria" USING btree ("negocio_id","creado_en");--> statement-breakpoint
-CREATE INDEX "auditoria_entidad_idx" ON "auditoria" USING btree ("entidad","entidad_id");
+CREATE INDEX "auditoria_entidad_idx" ON "auditoria" USING btree ("negocio_id","entidad","entidad_id");

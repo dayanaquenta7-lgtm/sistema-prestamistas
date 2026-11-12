@@ -24,6 +24,6 @@ export const auditoria = pgTable(
   },
   (tabla) => [
     index("auditoria_negocio_fecha_idx").on(tabla.negocioId, tabla.creadoEn),
-    index("auditoria_entidad_idx").on(tabla.entidad, tabla.entidadId),
+    index("auditoria_entidad_idx").on(tabla.negocioId, tabla.entidad, tabla.entidadId),
   ],
 ).enableRLS()

@@ -1,5 +1,5 @@
 {
-  "id": "1239b97d-9b82-4edb-8e94-f7872c8dbd3a",
+  "id": "b0b19da8-d76d-476e-a36e-362257767df6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -362,6 +362,12 @@
         "auditoria_entidad_idx": {
           "name": "auditoria_entidad_idx",
           "columns": [
+            {
+              "expression": "negocio_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
             {
               "expression": "entidad",
               "isExpression": false,
