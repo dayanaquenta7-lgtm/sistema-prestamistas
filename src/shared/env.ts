@@ -1,17 +1,9 @@
 import "server-only"
-import { z } from "zod"
-
-const esquemaEnv = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  DATABASE_URL: z.string().min(1),
-})
-
-export type Env = z.infer<typeof esquemaEnv>
+import { esquemaEnv, type Env } from "./esquema-env"
 
 let envValidado: Env | undefined
 
-/** Variables de entorno del servidor, validadas al primer uso. */
+/** Variables de entorno del servidor, validadas al arrancar (instrumentation.ts) o al primer uso. */
 export function env(): Env {
   if (!envValidado) {
     const resultado = esquemaEnv.safeParse(process.env)
