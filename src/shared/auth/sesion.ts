@@ -1,6 +1,7 @@
 import "server-only"
 import { and, asc, eq } from "drizzle-orm"
 import { redirect } from "next/navigation"
+import { connection } from "next/server"
 import { cache } from "react"
 import { z } from "zod"
 import { db } from "@/shared/db/cliente"
@@ -30,6 +31,9 @@ const esquemaMetadatos = z.object({
 
 /** Usuario con sesión válida, o null. Se resuelve una sola vez por solicitud. */
 export const leerUsuario = cache(async (): Promise<UsuarioSesion | null> => {
+  // getClaims() usa Date.now() para comprobar el vencimiento de la sesión; sin esto, el
+  // prerender del App Shell (partialPrefetching) falla con "unstable value Date.now()".
+  await connection()
   const supabase = await crearClienteSupabase()
   const { data, error } = await supabase.auth.getClaims()
   if (error || !data?.claims?.sub) return null
