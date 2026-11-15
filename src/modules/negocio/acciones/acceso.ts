@@ -10,26 +10,47 @@ import {
 } from "@/shared/auth/rutas"
 import { leerUsuario } from "@/shared/auth/sesion"
 import { crearClienteSupabase } from "@/shared/auth/supabase-servidor"
+import { env } from "@/shared/env"
 import { exito, fallo, type Resultado } from "@/shared/lib/resultado"
 import { validar } from "@/shared/lib/validar"
 import {
   esquemaCompletarRegistro,
   esquemaInicioSesion,
   esquemaRecuperarContrasena,
+  esquemaReenviarConfirmacion,
   esquemaRegistro,
   esquemaRestablecerContrasena,
 } from "../esquemas/acceso"
 import { crearNegocioInicial, type ResultadoNegocioInicial } from "./crear-negocio-inicial"
+import { clasificarErrorEnvio } from "./envio-correo"
 import { mensajeErrorAuth } from "./mensajes-auth"
 
-const CODIGOS_LIMITE = new Set(["over_email_send_rate_limit", "over_request_rate_limit"])
+/** Mismo resultado exista o no la cuenta; ver clasificarErrorEnvio. */
+function resultadoEnvioCorreo(codigoError: string | undefined, operacion: string): Resultado {
+  switch (clasificarErrorEnvio(codigoError)) {
+    case "limite-correo":
+      // Sin el correo ni otros datos personales: solo para diagnosticar correos que no llegaron.
+      console.warn(`[auth] Límite de envío de correos alcanzado (${operacion}); se respondió con el mensaje genérico.`)
+      return exito()
+    case "limite-solicitudes":
+      return fallo(mensajeErrorAuth(codigoError))
+    case "exito":
+      return exito()
+  }
+}
 
+/** En producción URL_APP es obligatoria (esquema de entorno); el origen de la solicitud solo se usa en desarrollo. */
 async function urlConfirmacion(siguiente: string): Promise<string> {
-  const encabezados = await headers()
-  const origen =
-    encabezados.get("origin") ??
-    `${encabezados.get("x-forwarded-proto") ?? "https"}://${encabezados.get("host") ?? ""}`
+  const origen = env().URL_APP ?? (await origenSolicitud())
   return `${origen}/auth/confirm?next=${encodeURIComponent(siguiente)}`
+}
+
+async function origenSolicitud(): Promise<string> {
+  const encabezados = await headers()
+  return (
+    encabezados.get("origin") ??
+    `${encabezados.get("x-forwarded-proto") ?? "http"}://${encabezados.get("host") ?? "localhost:3000"}`
+  )
 }
 
 export async function iniciarSesion(entrada: unknown): Promise<Resultado> {
@@ -98,9 +119,21 @@ export async function recuperarContrasena(entrada: unknown): Promise<Resultado> 
   const { error } = await supabase.auth.resetPasswordForEmail(validacion.datos.correo, {
     redirectTo: await urlConfirmacion(RUTA_RESTABLECER_CONTRASENA),
   })
-  if (error?.code && CODIGOS_LIMITE.has(error.code)) return fallo(mensajeErrorAuth(error.code))
-  // Mismo mensaje exista o no la cuenta.
-  return exito()
+  return resultadoEnvioCorreo(error?.code, "recuperación de contraseña")
+}
+
+/** Reenvía el correo de confirmación de registro (flujo PKCE: válido solo en este navegador). */
+export async function reenviarConfirmacion(entrada: unknown): Promise<Resultado> {
+  const validacion = validar(esquemaReenviarConfirmacion, entrada)
+  if (!validacion.ok) return validacion
+
+  const supabase = await crearClienteSupabase()
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: validacion.datos.correo,
+    options: { emailRedirectTo: await urlConfirmacion(RUTA_COMPLETAR_REGISTRO) },
+  })
+  return resultadoEnvioCorreo(error?.code, "reenvío de confirmación")
 }
 
 export async function restablecerContrasena(entrada: unknown): Promise<Resultado> {

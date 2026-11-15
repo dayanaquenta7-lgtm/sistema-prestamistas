@@ -24,10 +24,14 @@ export function FormularioRegistro() {
       <div className="flex flex-col gap-4">
         <Aviso variante="exito">
           Te enviamos un enlace a <strong className="font-medium">{getValues("correo")}</strong>. Ábrelo
-          para confirmar tu correo y terminar de crear tu negocio.
+          en este mismo navegador para confirmar tu correo y terminar de crear tu negocio.
         </Aviso>
         <p className="text-sm text-muted-foreground">
-          Si no lo ves en unos minutos, revisa la carpeta de correo no deseado.
+          Si no lo ves en unos minutos, revisa la carpeta de correo no deseado o{" "}
+          <Link href="/reenviar-confirmacion" className="text-primary underline underline-offset-4">
+            reenvía el correo
+          </Link>
+          .
         </p>
         <Link href="/login" className="text-center text-sm text-primary underline-offset-4 hover:underline">
           Volver a iniciar sesión

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   esquemaCompletarRegistro,
   esquemaInicioSesion,
+  esquemaReenviarConfirmacion,
   esquemaRegistro,
   esquemaRestablecerContrasena,
 } from "./acceso"
@@ -49,6 +50,13 @@ describe("esquemaCompletarRegistro", () => {
 describe("esquemaInicioSesion", () => {
   it("exige contraseña", () => {
     expect(esquemaInicioSesion.safeParse({ correo: "a@b.com", contrasena: "" }).success).toBe(false)
+  })
+})
+
+describe("esquemaReenviarConfirmacion", () => {
+  it("normaliza el correo y rechaza los inválidos", () => {
+    expect(esquemaReenviarConfirmacion.parse({ correo: " Ana@Correo.com " })).toEqual({ correo: "ana@correo.com" })
+    expect(esquemaReenviarConfirmacion.safeParse({ correo: "ana" }).success).toBe(false)
   })
 })
 

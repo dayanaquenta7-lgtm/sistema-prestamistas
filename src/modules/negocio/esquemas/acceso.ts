@@ -50,6 +50,8 @@ export const esquemaCompletarRegistro = z.object({
 
 export const esquemaRecuperarContrasena = z.object({ correo })
 
+export const esquemaReenviarConfirmacion = z.object({ correo })
+
 export const esquemaRestablecerContrasena = conConfirmacion(
   z.object({
     contrasena: contrasenaNueva,
@@ -61,4 +63,5 @@ export type DatosInicioSesion = z.infer<typeof esquemaInicioSesion>
 export type DatosRegistro = z.infer<typeof esquemaRegistro>
 export type DatosCompletarRegistro = z.infer<typeof esquemaCompletarRegistro>
 export type DatosRecuperarContrasena = z.infer<typeof esquemaRecuperarContrasena>
+export type DatosReenviarConfirmacion = z.infer<typeof esquemaReenviarConfirmacion>
 export type DatosRestablecerContrasena = z.infer<typeof esquemaRestablecerContrasena>

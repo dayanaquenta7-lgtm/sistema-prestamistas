@@ -2,12 +2,15 @@ export const RUTA_LOGIN = "/login"
 export const RUTA_INICIO_PANEL = "/cobrar-hoy"
 export const RUTA_COMPLETAR_REGISTRO = "/completar-registro"
 export const RUTA_RESTABLECER_CONTRASENA = "/restablecer-contrasena"
+export const RUTA_RECUPERAR_CONTRASENA = "/recuperar-contrasena"
+export const RUTA_REENVIAR_CONFIRMACION = "/reenviar-confirmacion"
 
 /** Rutas que no exigen sesión (el proxy no redirige a /login). */
 export const RUTAS_PUBLICAS = [
   "/login",
   "/registro",
   "/recuperar-contrasena",
+  "/reenviar-confirmacion",
   "/auth/confirm",
 ] as const
 
