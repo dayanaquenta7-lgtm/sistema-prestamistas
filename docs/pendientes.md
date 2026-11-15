@@ -18,6 +18,7 @@ Decisiones y tareas aplazadas, ordenadas por el sprint en que deben resolverse. 
 
 - Trigger que impida `UPDATE` y `DELETE` en la tabla `auditoria`.
 - Configurar un SMTP propio en Supabase antes del piloto con prestamistas reales.
+- Definir `URL_APP` en producción y cargar la URL de producción en Supabase (Site URL y Redirect URLs con `/auth/confirm**`).
 - Definir `URL_APP` para las vistas previas de Vercel (cada una tiene una URL distinta), para que los correos no apunten a producción. También agregar esas URL a Redirect URLs en Supabase.
 - Con el SMTP propio configurado, pasar las plantillas "Confirm signup" y "Reset password" al enlace con `token_hash`:
   - Confirm signup: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/completar-registro`
