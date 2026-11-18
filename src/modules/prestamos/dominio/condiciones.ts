@@ -36,7 +36,8 @@ export type Mora =
   | { tipo: "ninguna" }
   | { tipo: "porcentaje_diario" | "monto_diario" | "monto_por_cuota"; valor: string; diasGracia: number }
 
-export interface CondicionesPlantilla {
+// Alias de tipo (no interface) para que sea asignable a JSON en auditoría y jsonb.
+export type CondicionesPlantilla = {
   version: typeof VERSION_CONDICIONES
   metodo: MetodoInteres
   /** Null solo con método monto_fijo. */
