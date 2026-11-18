@@ -1,7 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 import { motivoFalloConfirmacion } from "@/shared/auth/confirmacion"
-import { RUTA_LOGIN, destinoConfirmacion } from "@/shared/auth/rutas"
+import { RUTA_LOGIN, destinoPermitido } from "@/shared/auth/rutas"
 import { crearClienteSupabase } from "@/shared/auth/supabase-servidor"
 
 const TIPOS_PERMITIDOS: readonly EmailOtpType[] = ["signup", "email", "recovery"]
@@ -29,7 +29,7 @@ async function canjearEnlace(parametros: URLSearchParams): Promise<string | null
 // y establece la cookie. Sin lógica de negocio ni escrituras en la BD.
 export async function GET(solicitud: NextRequest) {
   const { searchParams } = solicitud.nextUrl
-  const destino = destinoConfirmacion(searchParams.get("next"))
+  const destino = destinoPermitido(searchParams.get("next"))
 
   const codigoError = await canjearEnlace(searchParams)
   if (codigoError === null) {
