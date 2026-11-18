@@ -1,5 +1,6 @@
 import "server-only"
 import { and, asc, eq } from "drizzle-orm"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { connection } from "next/server"
 import { cache } from "react"
@@ -8,6 +9,7 @@ import { db } from "@/shared/db/cliente"
 import { membresias, negocios } from "@/shared/db/schema"
 import { cumpleRol, type Rol } from "./permisos"
 import { RUTA_COMPLETAR_REGISTRO, RUTA_INICIO_PANEL, RUTA_LOGIN } from "./rutas"
+import { COOKIE_NEGOCIO_ACTIVO, elegirMembresia } from "./seleccion-negocio"
 import { crearClienteSupabase } from "./supabase-servidor"
 
 export interface UsuarioSesion {
@@ -54,9 +56,9 @@ export async function obtenerUsuario(): Promise<UsuarioSesion> {
   return usuario
 }
 
-/** Membresía activa más antigua del usuario (orden determinista). */
-const leerMembresiaActiva = cache(async (usuarioId: string) => {
-  const [fila] = await db()
+/** Membresías activas del usuario, de la más antigua a la más nueva (orden determinista). */
+const leerMembresiasActivas = cache(async (usuarioId: string) => {
+  return db()
     .select({
       rol: membresias.rol,
       puedeCrearPrestamos: membresias.puedeCrearPrestamos,
@@ -71,9 +73,30 @@ const leerMembresiaActiva = cache(async (usuarioId: string) => {
     .innerJoin(negocios, eq(negocios.id, membresias.negocioId))
     .where(and(eq(membresias.usuarioId, usuarioId), eq(membresias.activo, true)))
     .orderBy(asc(membresias.creadoEn), asc(membresias.id))
-    .limit(1)
-  return fila ?? null
 })
+
+/**
+ * Membresía de la solicitud: la del negocio elegido en el selector si sigue
+ * activa; si no, la más antigua. Se consulta en cada solicitud, así que un
+ * ayudante desactivado pierde el acceso en su siguiente solicitud.
+ */
+const leerMembresiaActiva = cache(async (usuarioId: string) => {
+  const activas = await leerMembresiasActivas(usuarioId)
+  const preferido = (await cookies()).get(COOKIE_NEGOCIO_ACTIVO)?.value
+  return elegirMembresia(activas, preferido)
+})
+
+export interface NegocioDisponible {
+  id: string
+  nombre: string
+  rol: Rol
+}
+
+/** Negocios donde el usuario tiene una membresía activa, para el selector de negocio. */
+export async function listarNegociosDisponibles(usuarioId: string): Promise<NegocioDisponible[]> {
+  const activas = await leerMembresiasActivas(usuarioId)
+  return activas.map(({ negocio, rol }) => ({ id: negocio.id, nombre: negocio.nombre, rol }))
+}
 
 export type EstadoMembresia = "activa" | "inactiva" | "ninguna"
 
