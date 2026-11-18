@@ -10,6 +10,8 @@ Documento de referencia del producto. Define qué debe hacer el sistema, sus reg
 |---|---|---|
 | Configurar negocio, plantillas y tope legal | Sí | No |
 | Crear y editar clientes | Sí | Sí |
+| Definir o cambiar la tasa preferencial de un cliente | Sí | No (la ve, pero no la cambia) |
+| Marcar o quitar la marca "no prestar" de un cliente | Sí | No |
 | Crear préstamos | Sí | Configurable (por defecto no) |
 | Registrar cobros | Sí | Sí |
 | Anular pagos | Sí | No |
@@ -18,7 +20,7 @@ Documento de referencia del producto. Define qué debe hacer el sistema, sus reg
 | Gestionar usuarios del negocio | Sí | No |
 | Ver auditoría | Sí | No |
 
-Al registrarse, el usuario crea su negocio y queda como dueño.
+Al registrarse, el usuario confirma su correo y luego, en "Completar registro", crea su negocio y queda como dueño.
 
 ---
 
@@ -34,11 +36,13 @@ Al registrarse, el usuario crea su negocio y queda como dueño.
 
 ### 2.2 Clientes
 - Ficha: nombre completo (obligatorio), CI, teléfono, dirección, referencia (nombre y teléfono), foto opcional, notas.
-- **Tasa preferencial** opcional.
+- **CI** opcional, guardado en mayúsculas y sin espacios de más. Es único dentro de cada negocio: dos prestamistas distintos pueden tener al mismo cliente.
+- **Tasa preferencial** opcional (solo el dueño la define o cambia).
 - Estado del cliente derivado: sin préstamos, al día, en mora.
 - Vista de detalle: datos, préstamos (vigentes e históricos), pagos y total adeudado.
 - Búsqueda por nombre, CI o teléfono.
-- Marca de "no prestar" con motivo.
+- Marca de "no prestar" con motivo obligatorio (solo el dueño). Queda registrada en auditoría.
+- Los clientes no se eliminan: están ligados a préstamos, pagos y auditoría. En su lugar se usa la marca "no prestar".
 
 ### 2.3 Préstamos
 - **Simulador**: elegir plantilla, monto y fecha; ver cronograma, total a pagar, ganancia y tasa mensual equivalente sin guardar nada.
@@ -73,7 +77,7 @@ Al registrarse, el usuario crea su negocio y queda como dueño.
 - Saldo de caja.
 
 ### 2.7 Auditoría
-- Registro de: creación y anulación de préstamos, pagos y anulaciones, cambios de configuración y plantillas, cambios de tasa preferencial, confirmaciones de alerta legal, gestión de usuarios.
+- Registro de: creación y anulación de préstamos, pagos y anulaciones, cambios de configuración y plantillas, creación y edición de clientes, cambios de tasa preferencial, marca "no prestar", confirmaciones de alerta legal, gestión de usuarios.
 - Cada registro: usuario, fecha y hora, acción, entidad, valor anterior y valor nuevo.
 - Vista de consulta con filtros (solo dueño). No editable.
 
@@ -119,6 +123,7 @@ Condiciones del negocio → plantilla elegida → tasa preferencial del cliente 
 **RN-07 Estados derivados.**
 - Cuota: pendiente, por vencer (vence dentro de 3 días o menos), vencida, parcial, pagada.
 - Préstamo: vigente, en mora (al menos una cuota vencida con saldo), cancelado (todo pagado), refinanciado, anulado.
+- Cliente: en mora si algún préstamo está en mora; al día si tiene algún préstamo vigente sin mora; sin préstamos en cualquier otro caso.
 - Los estados en mora y por vencer se derivan de la fecha actual del negocio; no se guardan.
 
 **RN-08 Pagos inmutables.** Un pago no se edita ni se borra. La anulación conserva el registro original, revierte su aplicación, genera el movimiento de caja inverso y registra motivo y usuario.
@@ -160,7 +165,7 @@ Se deben agregar casos de redondeo, días no cobrables, feriados, pagos adelanta
 | Sprint | Objetivo | Entregable verificable |
 |---|---|---|
 | 0 | Cimientos | Login funcional, negocio creado al registrarse, layout del panel, utilidades probadas, primera migración |
-| 1 | Configuración y clientes | Plantillas, feriados, tope legal; CRUD de clientes con búsqueda |
+| 1 | Clientes, configuración y usuarios | Parte 1: CRUD de clientes con búsqueda y marca "no prestar". Parte 2: condiciones por defecto, plantillas, feriados, tope legal, gestión de ayudantes y selector de negocio |
 | 2 | Motor de cálculo | Dominio con tests de todos los casos de referencia; simulador en pantalla |
 | 3 | Préstamos | Crear préstamo con alerta legal, cronograma, detalle, PDF del documento, salida de caja |
 | 4 | Cobros y caja | Cobrar hoy, registrar y anular pagos, recibo, caja y gastos |
