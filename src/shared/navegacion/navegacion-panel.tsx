@@ -34,11 +34,19 @@ interface NavegacionPanelProps {
   secciones: Seccion[]
   nombreNegocio: string
   nombreUsuario: string
+  /** Selector de negocio si el usuario tiene más de uno (lo provee el módulo de negocio). */
+  selectorNegocio?: ReactNode
   /** Botón de cerrar sesión (lo provee el módulo de negocio). */
   pie: ReactNode
 }
 
-export function NavegacionPanel({ secciones, nombreNegocio, nombreUsuario, pie }: NavegacionPanelProps) {
+export function NavegacionPanel({
+  secciones,
+  nombreNegocio,
+  nombreUsuario,
+  selectorNegocio,
+  pie,
+}: NavegacionPanelProps) {
   const rutaActual = usePathname()
   const [masAbierto, setMasAbierto] = useState(false)
   const principales = secciones.filter((seccion) => seccion.principalMovil)
@@ -49,10 +57,14 @@ export function NavegacionPanel({ secciones, nombreNegocio, nombreUsuario, pie }
     <>
       {/* Escritorio: barra lateral fija */}
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r bg-sidebar md:flex">
-        <div className="border-b px-4 py-4">
-          <p className="truncate font-semibold">{nombreNegocio}</p>
-          <p className="truncate text-sm text-muted-foreground">{nombreUsuario}</p>
-        </div>
+        {selectorNegocio ? (
+          <div className="border-b p-2">{selectorNegocio}</div>
+        ) : (
+          <div className="border-b px-4 py-4">
+            <p className="truncate font-semibold">{nombreNegocio}</p>
+            <p className="truncate text-sm text-muted-foreground">{nombreUsuario}</p>
+          </div>
+        )}
         <nav aria-label="Secciones" className="flex-1 overflow-y-auto p-2">
           <ul className="flex flex-col gap-0.5">
             {secciones.map((seccion) => (
@@ -89,8 +101,8 @@ export function NavegacionPanel({ secciones, nombreNegocio, nombreUsuario, pie }
               </SheetTrigger>
               <SheetContent side="bottom" className="rounded-t-md">
                 <SheetHeader>
-                  <SheetTitle>{nombreNegocio}</SheetTitle>
-                  <p className="text-sm text-muted-foreground">{nombreUsuario}</p>
+                  <SheetTitle className={selectorNegocio ? "sr-only" : undefined}>{nombreNegocio}</SheetTitle>
+                  {selectorNegocio ?? <p className="text-sm text-muted-foreground">{nombreUsuario}</p>}
                 </SheetHeader>
                 <ul className="flex flex-col gap-0.5 px-2">
                   {secundarias.map((seccion) => (
