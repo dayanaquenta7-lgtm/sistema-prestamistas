@@ -16,7 +16,12 @@ export interface UsuarioSesion {
   id: string
   correo: string
   /** Datos enviados en signUp para precargar "Completar registro". */
-  metadatos: { nombre: string; nombreNegocio: string }
+  metadatos: {
+    nombre: string
+    nombreNegocio: string
+    /** "invitacion" si la cuenta se creó desde un enlace de invitación: no crea negocio propio. */
+    tipoRegistro: "negocio" | "invitacion"
+  }
 }
 
 export interface ContextoNegocio {
@@ -29,6 +34,7 @@ export interface ContextoNegocio {
 const esquemaMetadatos = z.object({
   nombre: z.string().catch(""),
   nombre_negocio: z.string().catch(""),
+  tipo_registro: z.enum(["negocio", "invitacion"]).catch("negocio"),
 })
 
 /** Usuario con sesión válida, o null. Se resuelve una sola vez por solicitud. */
@@ -45,7 +51,11 @@ export const leerUsuario = cache(async (): Promise<UsuarioSesion | null> => {
   return {
     id: claims.sub,
     correo: typeof claims.email === "string" ? claims.email : "",
-    metadatos: { nombre: metadatos.nombre, nombreNegocio: metadatos.nombre_negocio },
+    metadatos: {
+      nombre: metadatos.nombre,
+      nombreNegocio: metadatos.nombre_negocio,
+      tipoRegistro: metadatos.tipo_registro,
+    },
   }
 })
 

@@ -1,16 +1,17 @@
 "use server"
 
-import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import {
+  destinoPermitido,
+  esCodigoInvitacion,
   RUTA_COMPLETAR_REGISTRO,
   RUTA_INICIO_PANEL,
   RUTA_LOGIN,
   RUTA_RESTABLECER_CONTRASENA,
+  rutaInvitacion,
 } from "@/shared/auth/rutas"
 import { leerUsuario } from "@/shared/auth/sesion"
 import { crearClienteSupabase } from "@/shared/auth/supabase-servidor"
-import { env } from "@/shared/env"
 import { exito, fallo, type Resultado } from "@/shared/lib/resultado"
 import { validar } from "@/shared/lib/validar"
 import {
@@ -19,11 +20,14 @@ import {
   esquemaRecuperarContrasena,
   esquemaReenviarConfirmacion,
   esquemaRegistro,
+  esquemaRegistroInvitado,
   esquemaRestablecerContrasena,
 } from "../esquemas/acceso"
+import { MENSAJE_INVITACION_NO_DISPONIBLE, MENSAJE_REGISTRO_INVITADO } from "../mensajes-invitacion"
 import { crearNegocioInicial, type ResultadoNegocioInicial } from "./crear-negocio-inicial"
 import { clasificarErrorEnvio } from "./envio-correo"
 import { mensajeErrorAuth } from "./mensajes-auth"
+import { urlConfirmacion } from "./origen"
 
 /** Mismo resultado exista o no la cuenta; ver clasificarErrorEnvio. */
 function resultadoEnvioCorreo(codigoError: string | undefined, operacion: string): Resultado {
@@ -39,21 +43,8 @@ function resultadoEnvioCorreo(codigoError: string | undefined, operacion: string
   }
 }
 
-/** En producción URL_APP es obligatoria (esquema de entorno); el origen de la solicitud solo se usa en desarrollo. */
-async function urlConfirmacion(siguiente: string): Promise<string> {
-  const origen = env().URL_APP ?? (await origenSolicitud())
-  return `${origen}/auth/confirm?next=${encodeURIComponent(siguiente)}`
-}
-
-async function origenSolicitud(): Promise<string> {
-  const encabezados = await headers()
-  return (
-    encabezados.get("origin") ??
-    `${encabezados.get("x-forwarded-proto") ?? "http"}://${encabezados.get("host") ?? "localhost:3000"}`
-  )
-}
-
-export async function iniciarSesion(entrada: unknown): Promise<Resultado> {
+/** Tras iniciar sesión va al destino indicado solo si está en la lista permitida (por ejemplo, una invitación). */
+export async function iniciarSesion(entrada: unknown, siguiente?: unknown): Promise<Resultado> {
   const validacion = validar(esquemaInicioSesion, entrada)
   if (!validacion.ok) return validacion
 
@@ -64,7 +55,32 @@ export async function iniciarSesion(entrada: unknown): Promise<Resultado> {
   })
   if (error) return fallo(mensajeErrorAuth(error.code))
 
-  redirect(RUTA_INICIO_PANEL)
+  redirect(destinoPermitido(typeof siguiente === "string" ? siguiente : null))
+}
+
+/**
+ * Registro desde un enlace de invitación. El correo de confirmación vuelve a la
+ * invitación, donde el usuario la acepta y queda como ayudante, sin pasar por
+ * "Completar registro" ni crear un negocio.
+ */
+export async function registrarseInvitado(codigo: unknown, entrada: unknown): Promise<Resultado> {
+  if (!esCodigoInvitacion(codigo)) return fallo(MENSAJE_INVITACION_NO_DISPONIBLE)
+  const validacion = validar(esquemaRegistroInvitado, entrada)
+  if (!validacion.ok) return validacion
+
+  const { nombre, correo, contrasena } = validacion.datos
+  const supabase = await crearClienteSupabase()
+  const { error } = await supabase.auth.signUp({
+    email: correo,
+    password: contrasena,
+    options: {
+      emailRedirectTo: await urlConfirmacion(rutaInvitacion(codigo)),
+      data: { nombre, tipo_registro: "invitacion" },
+    },
+  })
+  // Mismo mensaje exista o no la cuenta, para no revelar qué correos están registrados.
+  if (error && error.code !== "user_already_exists") return fallo(mensajeErrorAuth(error.code))
+  return exito()
 }
 
 /**
@@ -95,6 +111,8 @@ export async function registrarse(entrada: unknown): Promise<Resultado> {
 export async function completarRegistro(entrada: unknown): Promise<Resultado> {
   const usuario = await leerUsuario()
   if (!usuario) redirect(RUTA_LOGIN)
+  // Quien se registró desde una invitación se une a un negocio existente; no crea uno propio.
+  if (usuario.metadatos.tipoRegistro === "invitacion") return fallo(MENSAJE_REGISTRO_INVITADO)
 
   const validacion = validar(esquemaCompletarRegistro, entrada)
   if (!validacion.ok) return validacion
