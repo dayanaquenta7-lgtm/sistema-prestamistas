@@ -6,7 +6,6 @@ Decisiones y tareas aplazadas, ordenadas por el sprint en que deben resolverse. 
 
 - Selector de negocio para usuarios con más de una membresía.
 - Foto del cliente en Supabase Storage (docs/alcance.md, 2.2). Quedó fuera de la parte 1: crear el bucket con acceso restringido por negocio y asignarla a la parte 2 o a un sprint posterior.
-- Prueba con sesión del módulo de clientes en 375 px y 1280 px, con dueño y con ayudante (los pasos están en el resumen de la parte 1).
 - Búsqueda de clientes sin distinguir tildes ("Pérez" = "Perez"): requiere la extensión `unaccent` y una migración que la cree.
 
 ## Sprint 2 — Motor de cálculo
