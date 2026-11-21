@@ -31,8 +31,7 @@ Decisiones y tareas aplazadas, ordenadas por el sprint en que deben resolverse. 
 - Trigger que impida `UPDATE` y `DELETE` en la tabla `auditoria`.
 - Paginación del listado de clientes en el servidor si un negocio supera los 200 clientes (hoy se muestran los primeros 200 y se pide usar el buscador).
 - Configurar un SMTP propio en Supabase antes del piloto con prestamistas reales.
-- Definir `URL_APP` en producción y cargar la URL de producción en Supabase (Site URL y Redirect URLs con `/auth/confirm**`).
-- Definir `URL_APP` para las vistas previas de Vercel (cada una tiene una URL distinta), para que los correos no apunten a producción. También agregar esas URL a Redirect URLs en Supabase.
+- Vistas previas de Vercel desactivadas en el primer despliegue: solo `main` se despliega, como producción (ver `docs/despliegue.md`). Vercel ejecuta las vistas previas con `NODE_ENV=production`, así que exigen `URL_APP`. Para reactivarlas: definir `URL_APP` por vista previa (cada una tiene una URL distinta, por ejemplo a partir de `VERCEL_BRANCH_URL`) para que los correos no apunten a producción, agregar esas URL a Redirect URLs en Supabase y quitar el Ignored Build Step.
 - Con el SMTP propio configurado, pasar las plantillas "Confirm signup" y "Reset password" al enlace con `token_hash`:
   - Confirm signup: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/completar-registro`
   - Reset password: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/restablecer-contrasena`
