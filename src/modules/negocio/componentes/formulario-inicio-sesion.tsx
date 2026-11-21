@@ -12,12 +12,24 @@ import { Input } from "@/shared/ui/input"
 import { iniciarSesion } from "../acciones/acceso"
 import { esquemaInicioSesion, type DatosInicioSesion } from "../esquemas/acceso"
 
-export function FormularioInicioSesion({ avisoInicial }: { avisoInicial?: AvisoLogin }) {
+interface FormularioInicioSesionProps {
+  avisoInicial?: AvisoLogin
+  /** Destino tras iniciar sesión, ya validado en el servidor (por ejemplo, una invitación). */
+  siguiente?: string
+  /** Código de la invitación de la que viene, para ofrecer el registro sin negocio propio. */
+  codigoInvitacion?: string
+}
+
+export function FormularioInicioSesion({ avisoInicial, siguiente, codigoInvitacion }: FormularioInicioSesionProps) {
   const { register, handleSubmit, setError, formState } = useForm<DatosInicioSesion>({
     resolver: zodResolver(esquemaInicioSesion),
     defaultValues: { correo: "", contrasena: "" },
   })
-  const { enviar, enviando, errorGeneral } = useEnvioFormulario(iniciarSesion, setError)
+  const { enviar, enviando, errorGeneral } = useEnvioFormulario(
+    (datos: DatosInicioSesion) => iniciarSesion(datos, siguiente),
+    setError,
+  )
+  const hrefRegistro = codigoInvitacion ? `/registro?invitacion=${codigoInvitacion}` : "/registro"
   const { errors } = formState
 
   return (
@@ -70,7 +82,7 @@ export function FormularioInicioSesion({ avisoInicial }: { avisoInicial?: AvisoL
         </Link>
         <p className="text-muted-foreground">
           ¿No tienes cuenta?{" "}
-          <Link href="/registro" className="text-primary underline-offset-4 hover:underline">
+          <Link href={hrefRegistro} className="text-primary underline-offset-4 hover:underline">
             Regístrate
           </Link>
         </p>

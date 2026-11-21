@@ -43,6 +43,20 @@ export const esquemaRegistro = conConfirmacion(
   }),
 )
 
+/** Registro desde un enlace de invitación: sin negocio, porque se une a uno existente como ayudante. */
+export const esquemaRegistroInvitado = conConfirmacion(
+  z.object({
+    nombre: nombrePersona,
+    correo,
+    contrasena: contrasenaNueva,
+    confirmacion: z.string(),
+  }),
+)
+
+/** Nombre que se pide al aceptar una invitación si el usuario aún no tiene perfil. */
+export const esquemaAceptarInvitacion = z.object({ nombre: z.string() })
+export const esquemaNombrePerfil = z.object({ nombre: nombrePersona })
+
 export const esquemaCompletarRegistro = z.object({
   nombre: nombrePersona,
   nombreNegocio,
@@ -61,6 +75,8 @@ export const esquemaRestablecerContrasena = conConfirmacion(
 
 export type DatosInicioSesion = z.infer<typeof esquemaInicioSesion>
 export type DatosRegistro = z.infer<typeof esquemaRegistro>
+export type DatosRegistroInvitado = z.infer<typeof esquemaRegistroInvitado>
+export type DatosAceptarInvitacion = z.infer<typeof esquemaAceptarInvitacion>
 export type DatosCompletarRegistro = z.infer<typeof esquemaCompletarRegistro>
 export type DatosRecuperarContrasena = z.infer<typeof esquemaRecuperarContrasena>
 export type DatosReenviarConfirmacion = z.infer<typeof esquemaReenviarConfirmacion>

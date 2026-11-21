@@ -1,6 +1,6 @@
 import type { Rol } from "@/shared/auth/permisos"
 import { calcularCambios, normalizarValor, type ObjetoJson } from "@/shared/lib/auditoria"
-import { tasasIguales } from "./normalizar"
+import { tasasIguales } from "@/shared/lib/tasas"
 
 /** Campos del cliente que se guardan desde el formulario (en su forma normalizada). */
 export interface CamposCliente {

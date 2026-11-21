@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest"
 import {
   esquemaCompletarRegistro,
   esquemaInicioSesion,
+  esquemaNombrePerfil,
+  esquemaRegistroInvitado,
   esquemaReenviarConfirmacion,
   esquemaRegistro,
   esquemaRestablecerContrasena,
@@ -68,5 +70,25 @@ describe("esquemaRestablecerContrasena", () => {
     expect(
       esquemaRestablecerContrasena.safeParse({ contrasena: "nueva1234", confirmacion: "nueva12345" }).success,
     ).toBe(false)
+  })
+})
+
+describe("esquemaRegistroInvitado", () => {
+  it("no pide nombre de negocio", () => {
+    const { nombre, correo, contrasena, confirmacion } = registroValido
+    const datos = { nombre, correo, contrasena, confirmacion }
+    expect(esquemaRegistroInvitado.parse(datos)).toEqual({ ...datos, correo: "ana@correo.com" })
+  })
+
+  it("exige que las contraseñas coincidan", () => {
+    const resultado = esquemaRegistroInvitado.safeParse({ ...registroValido, confirmacion: "otra12345" })
+    expect(resultado.success).toBe(false)
+  })
+})
+
+describe("esquemaNombrePerfil", () => {
+  it("exige un nombre", () => {
+    expect(esquemaNombrePerfil.parse({ nombre: " Luis " })).toEqual({ nombre: "Luis" })
+    expect(esquemaNombrePerfil.safeParse({ nombre: " " }).success).toBe(false)
   })
 })

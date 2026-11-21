@@ -20,7 +20,7 @@ Documento de referencia del producto. Define qué debe hacer el sistema, sus reg
 | Gestionar usuarios del negocio | Sí | No |
 | Ver auditoría | Sí | No |
 
-Al registrarse, el usuario confirma su correo y luego, en "Completar registro", crea su negocio y queda como dueño.
+Al registrarse, el usuario confirma su correo y luego, en "Completar registro", crea su negocio y queda como dueño. En el MVP cada negocio tiene un solo dueño: el que lo creó.
 
 ---
 
@@ -32,7 +32,12 @@ Al registrarse, el usuario confirma su correo y luego, en "Completar registro", 
 - **Plantillas de préstamo**: crear, editar, activar o desactivar. Cada una con nombre y condiciones completas.
 - **Tope de tasa mensual** para la alerta legal (3 % por defecto, editable).
 - **Calendario de feriados** del negocio (lista de fechas).
-- Gestión de usuarios: invitar ayudante por correo, cambiar rol, desactivar.
+- **Gestión de usuarios:**
+  - Invitar ayudantes con un **enlace de invitación** de un solo uso y con vencimiento, que el dueño comparte por WhatsApp u otro medio. No se envían invitaciones por correo.
+  - El invitado se registra (o inicia sesión, si ya tiene cuenta) desde el enlace y, al aceptarlo, queda como ayudante del negocio, sin crear un negocio propio.
+  - El dueño ve los usuarios y las invitaciones pendientes, puede revocar una invitación, activar o desactivar a un ayudante y darle o quitarle el permiso de crear préstamos.
+  - En el MVP no se cambia el rol de ayudante a dueño.
+- **Selector de negocio** para un usuario que pertenece a más de un negocio.
 
 ### 2.2 Clientes
 - Ficha: nombre completo (obligatorio), CI, teléfono, dirección, referencia (nombre y teléfono), foto opcional, notas.
@@ -77,7 +82,7 @@ Al registrarse, el usuario confirma su correo y luego, en "Completar registro", 
 - Saldo de caja.
 
 ### 2.7 Auditoría
-- Registro de: creación y anulación de préstamos, pagos y anulaciones, cambios de configuración y plantillas, creación y edición de clientes, cambios de tasa preferencial, marca "no prestar", confirmaciones de alerta legal, gestión de usuarios.
+- Registro de: creación y anulación de préstamos, pagos y anulaciones, cambios de configuración y plantillas, creación y edición de clientes, cambios de tasa preferencial, marca "no prestar", confirmaciones de alerta legal, gestión de usuarios e invitaciones.
 - Cada registro: usuario, fecha y hora, acción, entidad, valor anterior y valor nuevo.
 - Vista de consulta con filtros (solo dueño). No editable.
 
@@ -136,6 +141,8 @@ Condiciones del negocio → plantilla elegida → tasa preferencial del cliente 
 
 **RN-12 Refinanciación (fase 2).** El préstamo original pasa a refinanciado. El nuevo préstamo toma como capital el capital pendiente más el dinero nuevo entregado. Los intereses y la mora vencidos no se capitalizan automáticamente: se cobran o se condonan con registro en auditoría.
 
+**RN-13 Invitaciones.** Un enlace de invitación sirve una sola vez, vence a los 7 días y el dueño lo puede revocar antes. El sistema guarda solo un hash del código, nunca el código en claro. Aceptar una invitación crea la membresía de ayudante en una transacción que marca la invitación como usada; dos aceptaciones simultáneas no pueden crear dos membresías.
+
 ---
 
 ## 5. Casos de prueba de referencia del motor
@@ -165,7 +172,7 @@ Se deben agregar casos de redondeo, días no cobrables, feriados, pagos adelanta
 | Sprint | Objetivo | Entregable verificable |
 |---|---|---|
 | 0 | Cimientos | Login funcional, negocio creado al registrarse, layout del panel, utilidades probadas, primera migración |
-| 1 | Clientes, configuración y usuarios | Parte 1: CRUD de clientes con búsqueda y marca "no prestar". Parte 2: condiciones por defecto, plantillas, feriados, tope legal, gestión de ayudantes y selector de negocio |
+| 1 | Clientes, configuración y usuarios | Parte 1: CRUD de clientes con búsqueda y marca "no prestar". Parte 2: condiciones por defecto, plantillas, feriados, tope legal, gestión de ayudantes con enlace de invitación y selector de negocio |
 | 2 | Motor de cálculo | Dominio con tests de todos los casos de referencia; simulador en pantalla |
 | 3 | Préstamos | Crear préstamo con alerta legal, cronograma, detalle, PDF del documento, salida de caja |
 | 4 | Cobros y caja | Cobrar hoy, registrar y anular pagos, recibo, caja y gastos |

@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { aDecimal } from "@/shared/lib/dinero"
-import { normalizarCi, parsearTasa, textoOpcional } from "../dominio/normalizar"
+import { parsearTasa } from "@/shared/lib/tasas"
+import { normalizarCi, textoOpcional } from "../dominio/normalizar"
 
 const LARGO_NOMBRE = 150
 const LARGO_DIRECCION = 250
